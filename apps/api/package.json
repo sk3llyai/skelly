@@ -12,7 +12,8 @@
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:bootstrap-roles": "node scripts/bootstrap-db-role.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

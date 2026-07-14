@@ -3,10 +3,13 @@
 -- current tenant via `app.current_org_id`; Postgres filters every other org's rows out.
 
 -- 1) Restricted application role (created idempotently so this replays cleanly in CI).
+--    Created with NOLOGIN and no password here: a strong, per-environment password and
+--    LOGIN are granted separately by the role-bootstrap step (scripts/bootstrap-db-role.mjs)
+--    from the APP_DB_PASSWORD secret, so no database credential is ever committed to the repo.
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'skelly_app') THEN
-    CREATE ROLE skelly_app LOGIN PASSWORD 'skelly_app';
+    CREATE ROLE skelly_app NOLOGIN;
   END IF;
 END
 $$;

@@ -22,4 +22,18 @@ export default tseslint.config(
       sourceType: 'module',
     },
   },
+  {
+    // Plain JS/MJS scripts (e.g. db bootstrap) run under Node — declare its globals.
+    files: ['**/*.{js,cjs,mjs}'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        URL: 'readonly',
+        Buffer: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+      },
+    },
+  },
 );
