@@ -6,10 +6,31 @@ on:
   pull_request:
 
 # The safety net: nothing merges unless build + typecheck + lint + format + tests are green.
+# Tenant-isolation (RLS) tests run against a real Postgres so security is gated, not assumed.
 jobs:
   verify:
     name: Build, typecheck, lint & test
     runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: postgresql://skelly_app:skelly_app@localhost:5432/skelly?schema=public
+      DATABASE_ADMIN_URL: postgresql://skelly:skelly@localhost:5432/skelly?schema=public
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: skelly
+          POSTGRES_PASSWORD: skelly
+          POSTGRES_DB: skelly
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U skelly -d skelly"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,6 +58,9 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
+
+      - name: Apply database migrations (incl. RLS policies)
+        run: pnpm --filter @skelly/api exec prisma migrate deploy
 
       - name: Test
         run: pnpm -r --if-present test

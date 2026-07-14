@@ -10,8 +10,10 @@ services:
       POSTGRES_USER: skelly
       POSTGRES_PASSWORD: skelly
       POSTGRES_DB: skelly
+    # Host port 5433 (not the default 5432) to avoid clashing with any other
+    # local Postgres. Container still listens on 5432 internally.
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - skelly-pgdata:/var/lib/postgresql/data
     healthcheck:

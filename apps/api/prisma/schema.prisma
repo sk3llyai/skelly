@@ -1,0 +1,65 @@
+// Skelly data model — foundations.
+// Every tenant-owned table carries organisation_id and is protected by Postgres
+// Row-Level Security (see migration `*_rls_policies`). Two datasource URLs:
+//   url        — restricted app role (skelly_app), subject to RLS, used at runtime
+//   directUrl  — privileged role (skelly), used by Prisma for migrations / DDL only
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_ADMIN_URL")
+}
+
+/// A tenant. The root of the multi-tenancy tree; its own id is the tenant key.
+model Organisation {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users User[]
+  roles Role[]
+
+  @@map("organisations")
+}
+
+/// A per-organisation role (custom RBAC — roles are org-composed; Doc 09).
+model Role {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @map("organisation_id") @db.Uuid
+  name           String
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id])
+  users        User[]
+
+  @@unique([organisationId, name])
+  @@index([organisationId])
+  @@map("roles")
+}
+
+/// A member of an organisation. Authentication is delegated (WorkOS); no passwords stored.
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @map("organisation_id") @db.Uuid
+  email          String
+  name           String
+  roleId         String?   @map("role_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id])
+  role         Role?        @relation(fields: [roleId], references: [id])
+
+  @@unique([organisationId, email])
+  @@index([organisationId])
+  @@map("users")
+}
