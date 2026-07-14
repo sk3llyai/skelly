@@ -6,6 +6,11 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Explicit engine targets so Docker/cloud builds never mis-detect the OpenSSL variant:
+  //   native                      — local dev (macOS)
+  //   linux-arm64-openssl-3.0.x   — arm64 Linux containers (e.g. local Docker on Apple Silicon)
+  //   debian-openssl-3.0.x        — x86_64 Debian containers (e.g. AWS App Runner)
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {

@@ -1,0 +1,14 @@
+# Keep the build context small and never ship secrets or local build output.
+**/node_modules
+.git
+**/dist
+**/.next
+**/coverage
+**/*.log
+# secrets — never copy any real env file into an image
+**/.env
+**/.env.*
+!**/.env.example
+.env.staging
+# local-only
+docs
