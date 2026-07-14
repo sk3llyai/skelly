@@ -1,3 +1,5 @@
+import { AuthStatus } from './auth-status';
+
 export default function HomePage() {
   return (
     <main
@@ -11,9 +13,7 @@ export default function HomePage() {
       <p style={{ color: '#555', marginTop: 0 }}>
         Commercial operating system for bid &amp; tender teams.
       </p>
-      <p style={{ color: '#888' }}>
-        Phase&nbsp;0 — empty shell. Authentication, multi-tenancy and row-level security land next.
-      </p>
+      <AuthStatus />
     </main>
   );
 }
