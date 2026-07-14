@@ -1,0 +1,6 @@
+{
+  "name": "@skelly/calc-kernel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "RESERVED SEAM — the central calculation engine (tri-series, phases, adjustments, model DAG). Built in Phase 2; empty placeholder for now."
+}

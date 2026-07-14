@@ -1,0 +1,13 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Dependencies explicitly allowed to run install/build scripts (pnpm supply-chain guard).
+# All three fetch/build native binaries via a build script and are trusted, well-known deps:
+#   esbuild    — Vitest's bundler
+#   @swc/core  — NestJS decorator transform for Vitest
+#   sharp      — Next.js image optimization
+allowBuilds:
+  esbuild: true
+  '@swc/core': true
+  sharp: true

@@ -1,0 +1,24 @@
+# Local development infrastructure.
+# Postgres with the pgvector extension available (Skelly uses pgvector for similarity search).
+# Start with:  pnpm db:up    Stop with:  pnpm db:down
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: skelly-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: skelly
+      POSTGRES_PASSWORD: skelly
+      POSTGRES_DB: skelly
+    ports:
+      - '5432:5432'
+    volumes:
+      - skelly-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U skelly -d skelly']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  skelly-pgdata:
