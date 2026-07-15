@@ -1,0 +1,47 @@
+name: Build & push images to ECR
+
+# Builds the api + web container images on GitHub's (native amd64) runners and pushes
+# them to Amazon ECR. Runs on manual trigger, or on a push to main that changes app code.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - '.github/workflows/deploy-images.yml'
+
+env:
+  AWS_REGION: eu-central-1
+  ECR_REGISTRY: 253775151722.dkr.ecr.eu-central-1.amazonaws.com
+  # The live API address the web client is compiled against (build-time value).
+  API_URL: https://gidwaiprry.eu-central-1.awsapprunner.com
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        run: aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      - name: Build & push API image
+        run: |
+          docker build -f apps/api/Dockerfile -t "$ECR_REGISTRY/skelly-api:latest" .
+          docker push "$ECR_REGISTRY/skelly-api:latest"
+
+      - name: Build & push web image
+        run: |
+          docker build -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL="$API_URL" \
+            -t "$ECR_REGISTRY/skelly-web:latest" .
+          docker push "$ECR_REGISTRY/skelly-web:latest"
